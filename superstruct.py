@@ -33,6 +33,7 @@ class Struct(object):
         else:
             self.little_endian = little_endian
 
+        fmt_chr = '<' if self.little_endian else '>'
         partial_fmt = ''
         self._entries = []
         # Entries a list of (is_native, fmt, num_bytes, num_vals)
@@ -42,7 +43,7 @@ class Struct(object):
                 if partial_fmt != '':
                     num_bytes = struct.calcsize(partial_fmt)
                     num_vals = len(struct.unpack(partial_fmt, '\0'*num_bytes))
-                    self._entries.append((True, partial_fmt, num_bytes, num_vals))
+                    self._entries.append((True, fmt_chr + partial_fmt, num_bytes, num_vals))
                     partial_fmt = ''
                 self._entries.append((False, c, sizes[c], 1))
             elif c == '*':
@@ -53,7 +54,7 @@ class Struct(object):
         if partial_fmt != '':
             num_bytes = struct.calcsize(partial_fmt)
             num_vals = len(struct.unpack(partial_fmt, '\0'*num_bytes))
-            self._entries.append((True, partial_fmt, num_bytes, num_vals))
+            self._entries.append((True, fmt_chr + partial_fmt, num_bytes, num_vals))
 
         self._num_bytes = sum(map(lambda x: x[2], self._entries))
         self._num_vals = sum(map(lambda x: x[3], self._entries))
